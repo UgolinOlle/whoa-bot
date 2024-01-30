@@ -23,7 +23,7 @@ export default class EnvManager {
   private static validate(env: NodeJS.ProcessEnv) {
     if (env.TOKEN === '') throw new EnvError("Discord token doesn't exist.");
     if (env.PREFIX === '') throw new EnvError("Prefix doesn't exist.");
-    if (env.DISCORD_MODE != 'dev' || 'prod')
+    if (env.DISCORD_MODE != 'dev')
       throw new EnvError("Discord mode doesn't exist.");
     if (env.DEVELOPERS === '')
       throw new EnvError("Developers id doesn't exist.");

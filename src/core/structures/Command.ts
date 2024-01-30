@@ -12,12 +12,12 @@ export default abstract class Command {
   /**
    * Reference to the Whoa (Discord client) instance.
    */
-  private readonly client: Whoa;
+  public readonly client: Whoa;
 
   /**
    * Command-specific information such as name, description, etc.
    */
-  private readonly info: ICommand;
+  public readonly info: ICommand;
 
   /**
    * Constructor for the Command class.

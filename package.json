@@ -1,0 +1,39 @@
+{
+  "license": "MIT",
+  "name": "whoa-bot",
+  "version": "1.0.0",
+  "description": "Simple bot for Whoa discord server",
+  "repository": "git@github.com:UgolinOlle/whoa-bot.git",
+  "author": "Ugolin Ollé<hello@ugolin-olle.com>",
+  "private": false,
+  "scripts": {
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "format": "prettier --write 'src/**/*.{ts,tsx,json,md}'",
+    "start": "node dist/index.js",
+    "dev": "nodemon -w ./src -w ./.env ./src/index.ts"
+  },
+  "dependencies": {
+    "chalk": "4.1.2",
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.3.1",
+    "moment-timezone": "^0.5.43",
+    "require-all": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/require-all": "^3.0.5",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
