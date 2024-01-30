@@ -3,4 +3,5 @@ export interface IConfig {
   prefix: string;
   discord_mode: string;
   developers: string[];
+  guildID: string;
 }

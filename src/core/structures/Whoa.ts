@@ -39,6 +39,7 @@ export default class Whoa extends Client {
       prefix: process.env.PREFIX as string,
       discord_mode: process.env.DISCORD_MODE as string,
       developers: ['445957680729817088'],
+      guildID: process.env.GUILD_ID as string,
     };
 
     // Initialize the Whoa bot handler

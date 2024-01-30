@@ -8,6 +8,7 @@ import Event from '../structures/Event';
 import RegistryError from '../exceptions/RegistryError';
 import Logger from './Logger';
 import { isConstructor } from '../utils/common';
+import { WInteraction } from '../structures/Interaction';
 
 /**
  * The handler class for managing the commands and events for the Whoa bot.
@@ -18,6 +19,7 @@ export default class WhoaHandler {
   private commandPaths: string[] = [];
   private events: Collection<string, Event>;
   private eventPaths: string[] = [];
+  private interactions: Collection<string, WInteraction>;
   private cooldowns: Collection<string, Collection<string, number>>;
   private groups: Collection<string, string[]>;
 
@@ -30,6 +32,7 @@ export default class WhoaHandler {
     this.client = client;
     this.commands = new Collection<string, Command>();
     this.events = new Collection<string, Event>();
+    this.interactions = new Collection<string, WInteraction>();
     this.cooldowns = new Collection<string, Collection<string, number>>();
     this.groups = new Collection<string, string[]>();
   }
@@ -188,20 +191,78 @@ export default class WhoaHandler {
   }
 
   /**
+   * Scan all interaction command and register them.
+   */
+  private async registerAllInteractions() {
+    requireAll({
+      dirname: path.join(__dirname, '../../interactions'),
+      recursive: true,
+      filter: /\w*.[tj]s/g,
+      resolve: (x) => {
+        const interaction = x.default as WInteraction;
+
+        if (interaction.enabled) return;
+        if (interaction.require?.permission)
+          interaction.builder.setDefaultMemberPermissions(0);
+
+        this.interactions.set(interaction.builder.name, interaction);
+        Logger.log(
+          'INFO',
+          `Interaction ${interaction.builder.name} registered successfully.`,
+        );
+      },
+    });
+  }
+
+  /**
+   * Deploy all interaction commands to the guild.
+   */
+  public async deployAllInteractions() {
+    const guild = this.client.guilds.cache.get(this.client.config.guildID)!;
+    const interactionsJSON = [...this.interactions.values()].map((x) =>
+      x.builder.toJSON(),
+    );
+
+    const getRoles = (role: string) => {
+      const permissions = this.interactions.find((x) => x.builder.name === role)
+        ?.require?.permission;
+
+      if (!permissions) return null;
+      else
+        return guild.roles.cache.filter(
+          (x) => x.permissions.has(permissions) && !x.managed,
+        );
+    };
+
+    // TODO: Add dev only permissions
+    // TODO: Add full permissions access
+
+    await guild.commands.set(interactionsJSON);
+  }
+
+  /**
    * Finds and returns a command based on its name or one of its aliases.
    *
    * @param {string} command - The name or alias of the command to be searched for.
    * @returns {Command | undefined} - Returns the found command or `undefined` if no matching command is found.
    */
   public findCommand(command: string): Command | undefined {
-    // First, try to get the command directly by its name
     return (
       this.commands.get(command) ||
-      // If the direct search fails, look for any command which has the provided alias
       [...this.commands.values()].find(
         (c) => c.info.aliases && c.info.aliases.includes(command),
       )
     );
+  }
+
+  /**
+   * Find and returns an interactions based on its name.
+   *
+   * @param {string} interaction - The name of the interaction to be searched for.
+   * @returns {WInteraction | undefined} - Returns the found interaction or `undefined` if no matching interaction is found.
+   */
+  public findInteraction(interaction: string): WInteraction | undefined {
+    return this.interactions.get(interaction);
   }
 
   /**
@@ -221,12 +282,9 @@ export default class WhoaHandler {
    * @returns {Collection<string, number>} - Returns a collection of user IDs mapped to cooldown expiration times.
    */
   public getCooldown(name: string): Collection<string, number> {
-    // Check if the cooldown collection doesn't already exist for the given command
     if (!this.cooldowns.has(name)) {
-      // If not, initialize and set a new cooldown collection for the command
       this.cooldowns.set(name, new Collection<string, number>());
     }
-    // Return the cooldown collection for the given command
     return this.cooldowns.get(name) as Collection<string, number>;
   }
 
@@ -236,22 +294,20 @@ export default class WhoaHandler {
   public registerAll() {
     this.registerAllCommands();
     this.registerAllEvents();
+    this.registerAllInteractions();
   }
 
   /**
    * Reloads all commands and events by first clearing them, then re-registering.
    */
   public reloadAndRegister() {
-    // Remove event listeners
     const allEvents = [...this.events.keys()];
     allEvents.forEach((event) => this.client.removeAllListeners(event));
 
-    // Reset command and event collections
     this.commands = new Collection<string, Command>();
+    this.interactions = new Collection<string, WInteraction>();
     this.events = new Collection<string, Event>();
     this.cooldowns = new Collection<string, Collection<string, number>>();
-
-    // Register all commands and events again
     this.registerAll();
   }
 }

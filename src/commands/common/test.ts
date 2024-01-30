@@ -14,5 +14,9 @@ export default class TestCommand extends Command {
     });
   }
 
-  async run(message: Message, args: string[]): Promise<any> {}
+  async run(message: Message): Promise<any> {
+    console.log('ok');
+    console.log(message);
+    await message.channel.send('ok');
+  }
 }
