@@ -1,13 +1,10 @@
-import {
-  Collection,
-} from 'discord.js';
+import { Collection } from 'discord.js';
 import requireAll from 'require-all';
 import path from 'path';
 
 import Whoa from '../structures/Whoa';
 import Command from '../structures/Command';
 import Event from '../structures/Event';
-import Interaction from '../structures/Interaction';
 import RegistryError from '../exceptions/RegistryError';
 import Logger from './Logger';
 import { isConstructor } from '../utils/common';
@@ -19,7 +16,6 @@ export default class WhoaHandler {
   private client: Whoa;
   private commands: Collection<string, Command>;
   private commandPaths: string[] = [];
-  public interactions: Collection<string, Interaction>;
   private events: Collection<string, Event>;
   private eventPaths: string[] = [];
   private cooldowns: Collection<string, Collection<string, number>>;
@@ -33,7 +29,6 @@ export default class WhoaHandler {
   constructor(client: Whoa) {
     this.client = client;
     this.commands = new Collection<string, Command>();
-    this.interactions = new Collection<string, Interaction>();
     this.events = new Collection<string, Event>();
     this.cooldowns = new Collection<string, Collection<string, number>>();
     this.groups = new Collection<string, string[]>();
@@ -192,39 +187,6 @@ export default class WhoaHandler {
     }
   }
 
-  private registerAllInteraction() {
-    const interactions: any[] = [];
-
-    // -- Load all interactions from directory.
-    requireAll({
-      dirname: path.join(__dirname, '../../interactions'),
-      recursive: true,
-      filter: /\w*.[tj]s/g,
-      resolve: (x) => {
-        const interaction = x.default as Interaction;
-
-        if (!interaction.info.enabled) return;
-        if (interaction.info.permission)
-          interaction.info.builder.setDefaultMemberPermissions('0');
-
-        Logger.log('INFO', `Interaction ${interaction.info.builder.name}`);
-        this.interactions.set(interaction.info.builder.name, interaction);
-      },
-    });
-  }
-
-  public async deployInteractions() {
-    const guild = this.client.guilds.cache.get(process.env.GUILD_ID!)!;
-    const interactionsJSON = [...this.interactions.values()].map((x) =>
-      x.info.builder.toJSON(),
-    );
-
-    await guild.commands.set(interactionsJSON);
-  }
-
-  // ----------------------------------------------------------------------------------------- //
-  // -- Utils
-
   /**
    * Finds and returns a command based on its name or one of its aliases.
    *
@@ -274,7 +236,6 @@ export default class WhoaHandler {
   public registerAll() {
     this.registerAllCommands();
     this.registerAllEvents();
-    this.registerAllInteraction();
   }
 
   /**

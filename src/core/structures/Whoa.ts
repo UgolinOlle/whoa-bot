@@ -46,6 +46,5 @@ export default class Whoa extends Client {
 
     // Register all available commands and events through the handler
     this.handler.registerAll();
-    this.handler.deployInteractions();
   }
 }
