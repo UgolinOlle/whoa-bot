@@ -9,14 +9,12 @@ export default class TestCommand extends Command {
       description: 'A simple command to test for developer',
       group: 'Developer',
       require: {
-        developer: true,
+        developer: false,
       },
     });
   }
 
   async run(message: Message): Promise<any> {
-    console.log('ok');
-    console.log(message);
-    await message.channel.send('ok');
+    await message.reply('ok');
   }
 }

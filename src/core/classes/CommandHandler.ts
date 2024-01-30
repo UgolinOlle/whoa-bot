@@ -114,7 +114,6 @@ export default class CommandHandler {
       await cmd.run(message, args, () => {
         applyCooldown = false;
       });
-      console.log(cmd.info.name);
 
       if (addCooldown && applyCooldown && !isDev(client, message.author.id)) {
         timestamps.set(message.author.id, now);
