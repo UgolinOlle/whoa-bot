@@ -9,8 +9,6 @@ export default class ReadyEvent extends Event {
   }
 
   async run(): Promise<any> {
-    await client.handler.deployAllInteractions();
-    Logger.log('INFO', 'All commands and interactions has been deployed.');
     Logger.log(
       'INFO',
       `${this.client.user?.tag} as been launched successfully.`,

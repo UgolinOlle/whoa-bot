@@ -1,15 +1,7 @@
-import {
-  CommandInteraction,
-  GuildMember,
-  Message,
-  TextChannel,
-} from 'discord.js';
+import { GuildMember, Message, TextChannel } from 'discord.js';
 
 import Whoa from '../structures/Whoa';
-import messages from '../utils/Messages';
 import { isDev } from '../utils/common';
-import CInteraction from '../structures/Interaction';
-import Logger from './Logger';
 
 export default class CommandHandler {
   /**
@@ -121,40 +113,6 @@ export default class CommandHandler {
       }
     } catch (error) {
       await cmd.onError(message, error);
-    }
-  }
-
-  /**
-   * Handle interactions.
-   *
-   * @param client Whoa client
-   * @param interaction CommandInteraction object
-   */
-  static async handleInteraction(
-    client: Whoa,
-    interaction: CommandInteraction,
-  ) {
-    await interaction.deferReply();
-
-    const { commandName } = interaction;
-    const command = client.handler.findInteraction(commandName);
-
-    if (!command)
-      return await interaction.followUp({
-        ephemeral: true,
-        embeds: [
-          messages
-            .error()
-            .setDescription('An error occured, command not found.'),
-        ],
-      });
-
-    // TODO: Add permission checks.
-
-    try {
-      await command.run({ client, interaction: interaction as CInteraction });
-    } catch (error) {
-      Logger.log('ERROR', `An error occured: ${error}`);
     }
   }
 }
